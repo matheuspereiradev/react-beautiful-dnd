@@ -105,30 +105,20 @@ function App() {
       {
         name: "Brasileirão serie A",
         id: "brasileirao",
-        groups: {
-          [uuid()]: {
-            name: "Grupo A",
-            teams: brazilAGroup
-          },
-          [uuid()]: {
-            name: "Grupo B",
-            teams: brazilBGroup
-          }
-        }
+        groups:
+          [
+            brazilAGroup,
+            brazilBGroup
+          ]
+
       },
       {
         name: "Champions league (Europa)",
         id: "europe",
-        groups: {
-          [uuid()]: {
-            name: "Grupo 1",
-            teams: europeAGroup
-          },
-          [uuid()]: {
-            name: "Grupo 2",
-            teams: europeBGroup
-          }
-        }
+        groups: [
+          europeAGroup,
+          europeBGroup
+        ]
       }
     ]
   }
@@ -138,40 +128,19 @@ function App() {
     const { source, destination } = result;
     //pega o index que essa league representa
     const usedLeagueBoardIndex = dashboard.leagues.findIndex(element => element.id === idBoard);
-    //pega a liga que foi atualizada
-    const leagues = [...dashboard.leagues];
-
+    //pega a liga que foi atualizada e da um deep clone
+    const leagues = JSON.parse(JSON.stringify(dashboard.leagues));
 
     if (source.droppableId !== destination.droppableId) {
       //pega o sorce e dest grupos
-      const sourceColumn = dashboard.leagues[usedLeagueBoardIndex].groups[source.droppableId];
-      const destColumn = dashboard.leagues[usedLeagueBoardIndex].groups[destination.droppableId];
-      //pega os times desses grupos
-      const sourceItems = [...sourceColumn.teams];
-      const destItems = [...destColumn.teams];
+      const sourceColumn = leagues[usedLeagueBoardIndex].groups[source.droppableId];
+      const destColumn = leagues[usedLeagueBoardIndex].groups[destination.droppableId];
+
       //remove do sorce e insere no dest
-      const [removed] = sourceItems.splice(source.index, 1);
-      destItems.splice(destination.index, 0, removed);
+      const [removed] = sourceColumn.splice(source.index, 1);
+      destColumn.splice(destination.index, 0, removed);
 
-      //agora que os grupos foram atualizados devemos atualizar a liga setando os grupos corretos
-      //removendo as ligas removendo a antiga e adicionando a atual
-
-      leagues.splice(usedLeagueBoardIndex, 1, {
-        name: dashboard.leagues[usedLeagueBoardIndex].name,
-        id: dashboard.leagues[usedLeagueBoardIndex].id,
-        groups: {
-          ...dashboard.leagues[usedLeagueBoardIndex].groups,
-          [source.droppableId]: {
-            ...sourceColumn,
-            teams: sourceItems
-          },
-          [destination.droppableId]: {
-            ...destColumn,
-            teams: destItems
-          }
-        }
-      })
-
+      //atualiza as ligas colocando a nova conifguração
       setDashBoard(
         {
           ...dashboard,
@@ -180,22 +149,9 @@ function App() {
       )
 
     } else {
-      const column = dashboard.leagues[usedLeagueBoardIndex].groups[source.droppableId];
-      const copiedItems = [...column.teams];
-      const [removed] = copiedItems.splice(source.index, 1);
-      copiedItems.splice(destination.index, 0, removed);
-
-      leagues.splice(usedLeagueBoardIndex, 1, {
-        name: dashboard.leagues[usedLeagueBoardIndex].name,
-        id: dashboard.leagues[usedLeagueBoardIndex].id,
-        groups: {
-          ...dashboard.leagues[usedLeagueBoardIndex].groups,
-          [source.droppableId]: {
-            ...column,
-            teams: copiedItems
-          },
-        }
-      })
+      const column = leagues[usedLeagueBoardIndex].groups[source.droppableId];
+      const [removed] = column.splice(source.index, 1);
+      column.splice(destination.index, 0, removed);
 
       setDashBoard(
         {
@@ -220,7 +176,7 @@ function App() {
 
                 <div style={{ justifyContent: "center", display: "flex", height: "100%" }}>
                   {
-                    Object.entries(league.groups).map(([groupID, group], index) => {
+                    league.groups.map((group, index) => {
                       return (
                         <div
                           style={{
@@ -230,9 +186,9 @@ function App() {
                             margin: 10,
                             border: '1px black solid'
                           }}
-                          key={groupID}
+                          key={index}
                         >
-                          <Droppable droppableId={groupID} key={groupID}>
+                          <Droppable droppableId={String(index)} key={String(index)}>
                             {(provided, snapshot) => (
                               <div
                                 {...provided.droppableProps}
@@ -246,10 +202,9 @@ function App() {
                                   minHeight: 500
                                 }}
                               >
-                                {/* {provided.placeholder} */}
-                                <h3>{group.name}</h3>
+                                <h3>{`Grupo ${index + 1}`}</h3>
                                 <div className="team">
-                                  {group.teams.map(({ id, name, thumb }, index) => {
+                                  {group.map(({ id, name, thumb }, index) => {
                                     return (
                                       <Draggable
                                         key={id}
