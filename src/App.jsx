@@ -39,6 +39,16 @@ function App() {
       name: 'santos',
       thumb: '/santos.png'
     },
+    {
+      id: uuid(),
+      name: 'botafogo',
+      thumb: '/botafogo.png'
+    },
+    {
+      id: uuid(),
+      name: 'coritiba',
+      thumb: '/coritiba.png'
+    },
   ]
 
   const europeAGroup = [
@@ -80,6 +90,11 @@ function App() {
       id: uuid(),
       name: 'real madrid',
       thumb: '/realmadrid.png'
+    },
+    {
+      id: uuid(),
+      name: 'Olimpique Lyon',
+      thumb: '/lion.png'
     }
 
   ]
@@ -268,6 +283,7 @@ function App() {
                                     );
                                   })}
                                 </div>
+                                {provided.placeholder}
                               </div>
                             )}
                           </Droppable>
